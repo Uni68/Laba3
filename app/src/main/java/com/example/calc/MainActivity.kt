@@ -67,33 +67,56 @@ class MainActivity : AppCompatActivity() {
             currentOperation = ""
             tempNumber = ""
             binding.buttonAc.text = "AC"
-            binding.resultField.text = "0"
-            resultNumber = "0"
+            setResult("0")
 
         }
         binding.buttonPlusminus.setOnClickListener {
-            if(currentOperation != "") {
-                if(tempNumber == "")
-                    setTempNumber("-0")
-                else
-                    setTempNumber(correct(tempNumber
-                        .replace(',', '.').toDouble() * -1))
-            } else {
-                binding.resultField.text = correct(binding.resultField.text.toString()
-                    .replace(',', '.').toDouble() * -1)
+            if (binding.resultField.text.toString() != "Ошибка") {
+                if (currentOperation != "") {
+                    if (tempNumber == "")
+                        setTempNumber("-0")
+                    else
+                        setTempNumber(
+                            correct(
+                                tempNumber.replace(',', '.').toDouble() * -1
+                            )
+                        )
+                } else {
+                    binding.resultField.text = correct(
+                        binding.resultField.text.toString().replace(',', '.').toDouble() * -1
+                    )
+                }
             }
         }
         binding.buttonPercent.setOnClickListener {
-            if(currentOperation != ""){
-                if(tempNumber == "")
-                    setTempNumber(correct(resultNumber.replace(',', '.').toDouble()
-                            * resultNumber.replace(',', '.').toDouble() / 100f).replace('.', ','))
+            if (currentOperation != "") {
+                if (resultNumber != "Ошибка") {
+                    if (tempNumber == "")
+                        setTempNumber(
+                            correct(
+                                resultNumber.replace(',', '.').toDouble()
+                                        * resultNumber.replace(',', '.').toDouble() / 100f
+                            ).replace('.', ',')
+                        )
+                    else
+                        setTempNumber(
+                            correct(
+                                tempNumber.replace(',', '.').toDouble()
+                                        * resultNumber.replace(',', '.').toDouble() / 100f
+                            ).replace('.', ',')
+                        )
+                }
                 else
-                    setTempNumber(correct(tempNumber.replace(',', '.').toDouble()
-                            * resultNumber.replace(',', '.').toDouble() / 100f).replace('.', ','))
+                    setTempNumber("Ошибка")
             } else {
-                binding.resultField.text = correct(binding.resultField.text.toString()
-                    .replace(',', '.').toDouble() / 100f).replace('.', ',')
+                if (binding.resultField.text.toString() != "Ошибка") {
+                    binding.resultField.text = correct(
+                        binding.resultField.text.toString()
+                            .replace(',', '.').toDouble() / 100f
+                    ).replace('.', ',')
+                }
+                else
+                    setResult("Ошибка")
             }
         }
 
@@ -127,37 +150,44 @@ class MainActivity : AppCompatActivity() {
         }
         binding.buttonEquals.setOnClickListener {
             countResult()
-            resultNumber = "0"
         }
     }
 
 
     private fun countResult() {
         setButtonsColorOrange()
-        try {
-            if (currentOperation != "") {
-                if (tempNumber == "")
-                    tempNumber = resultNumber
-                lastOperation = currentOperation + tempNumber
-            }
-            if (lastOperation != "") {
-                result = if (tempNumber == "") ExpressionBuilder(
-                    binding.resultField.text.toString().replace(',', '.')
-                            + lastOperation.replace(',', '.')).build().evaluate()
-                else ExpressionBuilder(resultNumber.replace(',', '.')
-                            + lastOperation.replace(',', '.')).build().evaluate()
-                tempNumber = ""
-                currentOperation = ""
-                setResult(correct(result))
+            try {
+                if (currentOperation != "") {
+                    if (tempNumber == "")
+                        tempNumber = resultNumber
+                    lastOperation = currentOperation + tempNumber
+                }
+                if (lastOperation != "") {
+                    if(resultNumber != "Ошибка") {
+                        result = if (tempNumber == "") ExpressionBuilder(
+                            binding.resultField.text.toString().replace(',', '.')
+                                    + lastOperation.replace(',', '.')
+                        ).build().evaluate()
+                        else ExpressionBuilder(
+                            resultNumber.replace(',', '.')
+                                    + lastOperation.replace(',', '.')
+                        ).build().evaluate()
+                        setResult(correct(result))
+                    } else {
+                        setResult("Ошибка")
+                    }
+                    tempNumber = ""
+                    currentOperation = ""
 
-            }
-        }
-        catch (e: Exception) {
-            Log.d("Ошибка", "Сообщение: ${e.message}")
-            if (e.message == "Division by zero!") {
-                resultNumber = "0"
-                binding.resultField.text = "Ошибка"
-            }
+                }
+            } catch (e: Exception) {
+                Log.d("Ошибка", "Сообщение: ${e.message}")
+                if (e.message == "Division by zero!") {
+                    tempNumber = ""
+                    currentOperation = ""
+                    setResult("Ошибка")
+                }
+
         }
     }
 
